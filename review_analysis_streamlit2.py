@@ -1,4 +1,4 @@
-import openai
+from openai import OpenAI  # ✅ 新版导入
 import os
 import pandas as pd
 from wordcloud import WordCloud
@@ -26,22 +26,25 @@ if not st.session_state.api_key:
             st.session_state.ready = True
     st.stop()
 
-openai.api_key = st.session_state.api_key
+client = OpenAI(api_key=st.session_state.api_key)  # ✅ 新版客户端初始化
 
 # 定义 GPT 调用函数
 def llm_response(prompt):
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(  # ✅ 新版调用
             model='gpt-3.5-turbo',
             messages=[{'role': 'user', 'content': prompt}],
             temperature=0
         )
-        return response.choices[0].message['content']
-    except openai.OpenAIError:
-        st.error("❌ OpenAI 接口调用失败，可能是额度不足、API 错误或网络问题。请检查 Key 或稍后重试。")
-        st.session_state.api_key = ""
-        st.session_state.ready = False
-        st.stop()
+        return response.choices[0].message.content  # ✅ 新版属性访问
+    except openai.APIConnectionError as e:
+        st.error(f"❌ 网络连接失败: {e}")
+    except openai.AuthenticationError as e:
+        st.error(f"❌ API Key 错误: {e}")
+    except openai.APIError as e:
+        st.error(f"❌ OpenAI 接口错误: {e}")
+    st.session_state.api_key = ""  # 清空Key
+    st.stop()
 
 # 初始化 Streamlit app
 st.set_page_config(page_title="赛博私房菜 · 智能餐评分析", layout="wide")
