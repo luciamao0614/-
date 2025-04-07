@@ -1,36 +1,3 @@
-# review_analysis_streamlit.py
-
-import openai
-import os
-import pandas as pd
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-import streamlit as st
-from io import BytesIO
-from PIL import Image
-from collections import Counter
-
-# ↑ Mac系统下支持中文的字体路径
-CHINESE_FONT_PATH = '/System/Library/Fonts/PingFang.ttc'
-
-# ↑设置 API key（表单方式，防止输入无效）
-if "api_key" not in st.session_state:
-    st.session_state.api_key = ""
-if "ready" not in st.session_state:
-    st.session_state.ready = False
-
-if not st.session_state.api_key:
-    with st.form("apikey_form"):
-        user_key = st.text_input("请输入有效的 OpenAI API Key 以继续使用", type="password")
-        submitted = st.form_submit_button("确认提交")
-        if submitted and user_key:
-            st.session_state.api_key = user_key
-            st.session_state.ready = True
-    st.stop()
-
-openai.api_key = st.session_state.api_key
-
-# 定义 GPT 调用函数
 def llm_response(prompt):
     try:
         response = openai.ChatCompletion.create(
@@ -40,7 +7,7 @@ def llm_response(prompt):
         )
         return response.choices[0].message['content']
     except openai.OpenAIError:
-        st.error("❌ OpenAI 接口调用失败，可能是额度不足、API 错误或网络问题。请检查 Key 或稍后重试。")
+        st.error(f"❌ OpenAI 接口调用失败：{str(e)}")
         st.session_state.api_key = ""
         st.session_state.ready = False
         st.stop()
