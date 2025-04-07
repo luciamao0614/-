@@ -1,4 +1,5 @@
-from openai import OpenAI  # ✅ 新版导入
+import openai
+from openai import OpenAI
 import os
 import pandas as pd
 from wordcloud import WordCloud
@@ -26,24 +27,27 @@ if not st.session_state.api_key:
             st.session_state.ready = True
     st.stop()
 
-client = OpenAI(api_key=st.session_state.api_key)  # ✅ 新版客户端初始化
+# ✅ 关键修改1：初始化客户端（新版SDK）
+client = OpenAI(api_key=st.session_state.api_key)
 
-# 定义 GPT 调用函数
+# ✅ 关键修改2：更新后的llm_response函数
 def llm_response(prompt):
     try:
-        response = client.chat.completions.create(  # ✅ 新版调用
+        response = client.chat.completions.create(
             model='gpt-3.5-turbo',
             messages=[{'role': 'user', 'content': prompt}],
             temperature=0
         )
-        return response.choices[0].message.content  # ✅ 新版属性访问
-    except openai.APIConnectionError as e:
-        st.error(f"❌ 网络连接失败: {e}")
-    except openai.AuthenticationError as e:
-        st.error(f"❌ API Key 错误: {e}")
-    except openai.APIError as e:
-        st.error(f"❌ OpenAI 接口错误: {e}")
-    st.session_state.api_key = ""  # 清空Key
+        return response.choices[0].message.content
+    except openai.AuthenticationError:
+        st.error("❌ API Key无效或已过期，请检查后重新输入")
+        st.session_state.api_key = ""
+    except openai.RateLimitError:
+        st.error("❌ 请求过于频繁，请稍后再试")
+    except openai.APIConnectionError:
+        st.error("❌ 网络连接失败，请检查网络设置")
+    except Exception as e:
+        st.error(f"❌ 未知错误: {str(e)}")
     st.stop()
 
 # 初始化 Streamlit app
