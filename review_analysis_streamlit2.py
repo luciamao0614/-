@@ -9,7 +9,6 @@ import streamlit as st
 from io import BytesIO
 from PIL import Image
 from collections import Counter
-from openai.error import RateLimitError  # ✅ 修复云端异常导入问题
 
 # ↑ Mac系统下支持中文的字体路径
 CHINESE_FONT_PATH = '/System/Library/Fonts/PingFang.ttc'
@@ -40,8 +39,8 @@ def llm_response(prompt):
             temperature=0
         )
         return response.choices[0].message['content']
-    except RateLimitError:
-        st.error("❌ 你的 API Key 已超出调用限制，请更换 Key 或稍后重试。")
+    except openai.OpenAIError:
+        st.error("❌ OpenAI 接口调用失败，可能是额度不足、API 错误或网络问题。请检查 Key 或稍后重试。")
         st.session_state.api_key = ""
         st.session_state.ready = False
         st.stop()
