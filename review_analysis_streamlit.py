@@ -13,12 +13,19 @@ from collections import Counter
 # ↑ Mac系统下支持中文的字体路径
 CHINESE_FONT_PATH = '/System/Library/Fonts/PingFang.ttc'
 
-# ↑设置 API key（环境变量或通过输入框）
+# ↑设置 API key（表单方式，防止输入无效）
 if "api_key" not in st.session_state:
-    st.session_state.api_key = os.getenv("OPENAI_API_KEY") or ""
+    st.session_state.api_key = ""
+if "ready" not in st.session_state:
+    st.session_state.ready = False
 
 if not st.session_state.api_key:
-    st.session_state.api_key = st.text_input("请输入有效的 OpenAI API Key 以继续使用", type="password")
+    with st.form("apikey_form"):
+        user_key = st.text_input("请输入有效的 OpenAI API Key 以继续使用", type="password")
+        submitted = st.form_submit_button("确认提交")
+        if submitted and user_key:
+            st.session_state.api_key = user_key
+            st.session_state.ready = True
     st.stop()
 
 openai.api_key = st.session_state.api_key
@@ -35,6 +42,7 @@ def llm_response(prompt):
     except openai.error.RateLimitError:
         st.error("❌ 你的 API Key 已超出调用限制，请更换 Key 或稍后重试。")
         st.session_state.api_key = ""
+        st.session_state.ready = False
         st.stop()
 
 # 初始化 Streamlit app
