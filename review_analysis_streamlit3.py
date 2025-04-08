@@ -86,8 +86,8 @@ prompt = '''
     - 如果无关，请返回： <编号>. Irrelevant
 2. 如果有关，请执行：
     - 分类情绪：Positive 或 Negative
-    - 提取1-3个关键词（名词/名词短语）
-    - 给出1-2个标签（如：服务、食品、餐厅体验、外卖）
+    - 提取1-3个关键词（名词/名词短语，可以为中文）
+    - 给出1-2个标签（请用英文输出，如：food, service, dining experience, delivery）
 
 输出格式：
 <编号>. Sentiment: <Positive/Negative> | Keywords: <关键词> | Tags: <标签>
