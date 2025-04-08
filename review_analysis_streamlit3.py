@@ -154,7 +154,7 @@ if all_tags:
         width=800,
         height=400,
         background_color='white',
-        font_path=CHINESE_FONT_PATH
+        # font_path=CHINESE_FONT_PATH
     ).generate(tag_text)
 
     img_buffer = BytesIO()
